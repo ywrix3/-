@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Безопасность серверной комнаты | Физическая и логическая защита</title>
+    <!-- Google Fonts & Font Awesome для современного вида -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            color: #1e2a3e;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Хедер с параллакс-эффектом */
+        .hero {
+            background: linear-gradient(135deg, #0b2b3b 0%, #1a4a5f 100%);
+            color: white;
+            padding: 80px 0 90px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 4px solid #00b4aa;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 200" opacity="0.08"><path fill="white" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"/></svg>');
+            background-repeat: repeat-x;
+            background-position: bottom;
+            background-size: 800px;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.92;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .badge-header {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* Секции */
+        section {
+            padding: 70px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: #00b4aa;
+            border-radius: 4px;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #eef2f6;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.12);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: #00b4aa;
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .card p, .card li {
+            color: #334155;
+        }
+        .card ul {
+            padding-left: 1.2rem;
+            margin-top: 0.8rem;
+        }
+        .card li {
+            margin: 0.5rem 0;
+        }
+
+        /* Таблица сравнения */
+        .comparison-table {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid #e2edf2;
+            margin-top: 2rem;
+        }
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .table-header {
+            background: #1e2f3c;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 1.2rem;
+            text-align: center;
+        }
+        .table-item {
+            padding: 1rem 1.5rem;
+            background: #ffffff;
+        }
+        .table-item:nth-child(odd) {
+            background: #fafcff;
+        }
+        .table-item strong {
+            color: #0f3b47;
+        }
+        .highlight {
+            background: #e0f7f5;
+            font-weight: 500;
+        }
+
+        /* Список лучших практик */
+        .best-practices {
+            background: linear-gradient(120deg, #f9fbfd 0%, #ffffff 100%);
+            border-radius: 32px;
+            padding: 2rem;
+            border-left: 6px solid #00b4aa;
+            margin: 2rem 0;
+        }
+        .best-practices h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .checklist {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .checklist span {
+            background: #eef2ff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checklist i {
+            color: #00b4aa;
+        }
+
+        /* SVG иконки камер */
+        .security-visual {
+            background: #ffffffdd;
+            border-radius: 28px;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        footer {
+            background: #0b262f;
+            color: #cbd5e1;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .btn-up {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00b4aa;
+            color: white;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            z-index: 99;
+        }
+        .btn-up:hover {
+            background: #0e6b64;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            section {
+                padding: 50px 0;
+            }
+            .table-row {
+                grid-template-columns: 1fr;
+            }
+            .table-header {
+                display: none;
+            }
+            .table-item:first-child {
+                font-weight: 700;
+                background: #eef2f6;
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* анимация */
+        .fade-up {
+            animation: fadeUp 0.6s ease-out;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<button class="btn-up" id="scrollTopBtn" aria-label="Наверх"><i class="fas fa-arrow-up"></i></button>
+
+<header class="hero">
+    <div class="container hero-content">
+        <div class="badge-header"><i class="fas fa-shield-alt"></i> Стандарты ISO 27001 & ГОСТ Р</div>
+        <h1>Обеспечение физической и логической безопасности серверной комнаты</h1>
+        <p>Комплексная защита критической инфраструктуры: от контроля доступа до шифрования данных и мониторинга угроз</p>
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <span style="background:rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 40px;"><i class="fas fa-lock"></i> Физический периметр</span>
+            <span style="background:rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 40px;"><i class="fas fa-network-wired"></i> Логическая защита</span>
+            <span style="background:rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 40px;"><i class="fas fa-eye"></i> 24/7 мониторинг</span>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <!-- Физическая безопасность -->
+        <section id="physical">
+            <h2 class="section-title"><i class="fas fa-building-shield"></i> Физическая безопасность</h2>
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-door-closed"></i></div>
+                    <h3>Контроль доступа</h3>
+                    <p>Многофакторная аутентификация: биометрия (отпечаток пальца/радужка) + RFID-карты + PIN-код. Турникеты, тамбур-шлюзы с антипасбек.</p>
+                    <ul>
+                        <li>✓ Журналы входа/выхода в реальном времени</li>
+                        <li>✓ Разграничение зон: серверные стойки, сетевое оборудование</li>
+                        <li>✓ Система видеонаблюдения с ИИ-аналитикой</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-video"></i></div>
+                    <h3>Видеонаблюдение и охрана</h3>
+                    <p>IP-камеры 4K с ночным режимом, детекция движения, распознавание лиц. Хранение записей не менее 90 дней.</p>
+                    <ul>
+                        <li>✓ Удаленный контроль через SOC/NOC</li>
+                        <li>✓ Датчики открытия дверей, вибрации и разбития стекла</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-temperature-high"></i></div>
+                    <h3>Инженерная инфраструктура</h3>
+                    <p>Климат-контроль (прецизионные кондиционеры), датчики утечки воды, дыма, температуры. ИБП и дизель-генераторы с автоматикой.</p>
+                    <ul><li>✓ Мониторинг влажности и задымления по SNMP</li><li>✓ Автоматическое пожаротушение (инертный газ)</li></ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-fingerprint"></i></div>
+                    <h3>Анти-саботаж</h3>
+                    <p>Конструкция серверных стоек с блокировкой, гермозона, защита от электромагнитных наводок, сейсмостойкие крепления.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Логическая безопасность -->
+        <section id="logical">
+            <h2 class="section-title"><i class="fas fa-microchip"></i> Логическая безопасность</h2>
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-id-card"></i></div>
+                    <h3>Управление доступом к данным</h3>
+                    <p>RBAC (ролевая модель), принцип минимальных привилегий. Многофакторная аутентификация для администраторов.</p>
+                    <ul><li>✓ Интеграция с LDAP/Active Directory</li><li>✓ PAM (Privileged Access Management) для сервисных учеток</li></ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-shield-virus"></i></div>
+                    <h3>Сетевая защита</h3>
+                    <p>Сегментация VLAN, NGFW с IPS/IDS, защита от DDoS, микросегментация трафика между серверами.</p>
+                    <ul><li>✓ Изоляция management-плоскости</li><li>✓ Строгие правила межсетевого экрана (least privilege)</li></ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Шифрование и аудит</h3>
+                    <p>Шифрование данных на дисках (AES-256), TLS 1.3 для каналов. Централизованный SIEM-аудит всех событий.</p>
+                    <ul><li>✓ Логирование SSH, RDP, доступа к БД</li><li>✓ Обнаружение аномалий поведения (UEBA)</li></ul>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3>Резервное копирование и DRP</h3>
+                    <p>3-2-1 стратегия: 3 копии, 2 разных носителя, 1 оффлайн. Регулярные учения по восстановлению.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Сравнение угроз -->
+        <section id="comparison">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> Основные угрозы и методы защиты</h2>
+            <div class="comparison-table">
+                <div class="table-row table-header">
+                    <div>Физические угрозы / Методы</div>
+                    <div>Логические угрозы / Контрмеры</div>
+                </div>
+                <div class="table-row">
+                    <div class="table-item"><strong>🔓 Несанкционированный доступ в серверную</strong><br>→ Биометрические считыватели + видеодомофон, охрана периметра</div>
+                    <div class="table-item"><strong>💻 Взлом через уязвимости ОС/ПО</strong><br>→ Регулярное обновление, сканирование уязвимостей, EDR агенты</div>
+                </div>
+                <div class="table-row">
+                    <div class="table-item"><strong>🔥 Пожар, перегрев</strong><br>→ Газовое пожаротушение, мониторинг температуры, датчики дыма</div>
+                    <div class="table-item"><strong>🕵️‍♂️ Фишинговые атаки на админов</strong><br>→ Многофакторная аутентификация, антифишинг-тренинги, PAM</div>
+                </div>
+                <div class="table-row">
+                    <div class="table-item"><strong>⚡ Отключение электроэнергии</strong><br>→ ИБП с автоматическим переключением, дизель-генераторы</div>
+                    <div class="table-item"><strong>📡 Перехват трафика (MITM)</strong><br>→ Шифрование TLS, сегментация, 802.1X, VPN для удаленного доступа</div>
+                </div>
+                <div class="table-row">
+                    <div class="table-item"><strong>🌊 Вода / протечки</strong><br>→ Датчики протечки на фальшполу, герметизация кабель-каналов</div>
+                    <div class="table-item"><strong>📀 Инсайдеры / утечка данных</strong><br>→ DLP-системы, контроль съемных носителей, мониторинг привилегированных сессий</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Передовые практики / Чеклист -->
+        <section id="best-practices">
+            <div class="best-practices">
+                <h3><i class="fas fa-check-double"></i> Ключевые рекомендации по безопасности серверной комнаты</h3>
+                <div class="checklist">
+                    <span><i class="fas fa-check-circle"></i> Физический контроль: двухфакторный доступ + видеонаблюдение с ИИ</span>
+                    <span><i class="fas fa-check-circle"></i> Весь кабель менеджмент защищен и промаркирован</span>
+                    <span><i class="fas fa-check-circle"></i> Использование HSM/TMP для ключей шифрования</span>
+                    <span><i class="fas fa-check-circle"></i> SIEM-система с корреляцией событий (физика + логика)</span>
+                    <span><i class="fas fa-check-circle"></i> Автоматический бекап конфигурации сетевых устройств</span>
+                    <span><i class="fas fa-check-circle"></i> Инвентаризация оборудования и RFID-метки серверов</span>
+                    <span><i class="fas fa-check-circle"></i> Политика чистого рабочего стола и отсутствия посторонних устройств</span>
+                </div>
+                <p style="margin-top: 1.5rem; font-style: italic; color: #2c5a6b;"><i class="fas fa-brain"></i> Регулярные пентесты (физическое проникновение + цифровой аудит) — ключ к актуальному уровню защиты.</p>
+            </div>
+        </section>
+
+        <!-- Интерактивная карта безопасности / статистика стилизованная -->
+        <section id="tech-stack" style="border-bottom: none;">
+            <h2 class="section-title"><i class="fas fa-chart-simple"></i> Интегрированная модель защиты</h2>
+            <div class="grid-2col" style="margin-bottom: 2rem;">
+                <div class="card" style="background: linear-gradient(145deg, #ffffff, #f8fafc);">
+                    <div class="card-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>Конвергенция физической и логической безопасности</h3>
+                    <p>Современный центр управления безопасностью (PSIM+SOC) объединяет данные с систем контроля доступа, видеокамер, датчиков окружающей среды и SIEM. Аномалии входа в ночное время + подозрительный трафик от сессии администратора создают скоординированный инцидент.</p>
+                    <progress value="85" max="100" style="width:100%; height:8px; border-radius:10px; margin-top:15px;"></progress>
+                    <span style="font-size:0.8rem;">Эффективность интеграции: 85% снижение времени реакции</span>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+                    <h3>Ключевые метрики (KPI)</h3>
+                    <ul>
+                        <li>MTTD (среднее время обнаружения) — <strong>2 минуты</strong></li>
+                        <li>MTTR (время восстановления) — <strong>менее 4 часов</strong></li>
+                        <li>Доступность серверной комнаты — <strong>99.982%</strong></li>
+                        <li>Количество неудачных попыток доступа / месяц — мониторинг</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="background:#eef2fa; border-radius: 32px; padding: 1.5rem; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: space-between;">
+                    <div><i class="fas fa-shield-haltered" style="font-size: 2rem; color:#008b7a;"></i> <strong>Zero Trust модель для серверной</strong> — никогда не доверяй, всегда проверяй.</div>
+                    <div><i class="fas fa-tachometer-alt"></i> Непрерывная валидация доступа к оборудованию и данным.</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p><i class="fas fa-server"></i> Обеспечение безопасности серверной комнаты — комплекс физических и кибермер. Данный гайд соответствует лучшим практикам NIST, ISO 27001 и требованиям регуляторов.</p>
+        <p style="margin-top: 15px;">© 2025 | Безопасность инфраструктуры | Регулярный аудит и повышение осведомленности персонала</p>
+        <div style="margin-top: 20px;">
+            <i class="fab fa-linux"></i>   <i class="fas fa-network-wired"></i>   <i class="fas fa-door-open"></i>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Плавная прокрутка и кнопка наверх
+    const scrollBtn = document.getElementById('scrollTopBtn');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+            scrollBtn.style.display = 'flex';
+        } else {
+            scrollBtn.style.display = 'none';
+        }
+    });
+
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // Добавляем плавный якорь (для всех ссылок, но на текущей странице нет внутренних якорей, можно добавить)
+    // Небольшая анимация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        const elements = document.querySelectorAll('.card, .comparison-table, .best-practices');
+        elements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(18px)';
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.5s ease, transform 0.4s ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 80);
+        });
+        // отображение кнопки
+        scrollBtn.style.display = 'none';
+    });
+</script>
+</body>
+</html>
